@@ -1,0 +1,30 @@
+# 站点基本信息
+site:
+  title: "Your Smart Routing"
+  description: "Your Smart Routing System"
+  language: "zh"
+
+# CDN 端点配置
+cdnEndpoints:
+  - name: "Aliyun" 
+    url: "https://aliyun.com/"
+  - name: "Gcore CDN"
+    url: "https://gcore.com/"
+  - name: "Cloudflare" 
+    url: "https://www.cloudflare.com/"
+
+# UI 文本配置    
+ui:
+  testingText: "正在测试线路..."
+  retryText: "重新测试"
+  connectErrorText: "连接失败"
+  bestRouteText: "最佳线路:"
+  allFailedText: "所有线路测试失败"
+
+# 测速相关配置
+speedtest:
+  timeout: 3000  # 超时时间(ms)
+  attempts: 3    # 每个节点测试次数
+  maxRetries: 2  # 最大重试次数
+  retryDelay: 500 # 重试间隔(ms)
+  redirectDelay: 2000 # 跳转延迟(ms)
