@@ -25,7 +25,7 @@ DelayR 是一个轻量级的前端智能线路测速与跳转系统，可以帮�
 
 1. 克隆仓库：
 ```bash
-git clone https://github.com/yourusername/DelayR.git
+git clone https://github.com/KintaMiao/DelayR.git
 ```
 2. 部署到您的Web服务器
 
