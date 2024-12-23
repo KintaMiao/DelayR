@@ -1,25 +1,97 @@
 const delay = (ms, factor = 1) => new Promise(resolve => setTimeout(resolve, ms * factor));
 
+let config = null;
+let isTestingActive = false;
+let activeControllers = [];
+let redirectTimer = null;
+
 async function loadConfig() {
-    const response = await fetch('config.yaml');
-    const yamlText = await response.text();
-    return jsyaml.load(yamlText);
+    try {
+        // 检查依赖
+        if (typeof jsyaml === 'undefined') {
+            throw new Error('jsyaml 未加载');
+        }
+        
+        const response = await fetch('config.yaml');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const yamlText = await response.text();
+        return jsyaml.load(yamlText);
+    } catch (error) {
+        console.error('加载配置失败:', error);
+        throw error;
+    }
 }
 
 async function updateUIFromConfig() {
+    if (!config || !config.site || !config.ui) {
+        throw new Error("配置信息缺失");
+    }
+    
+    // 使用安全的 DOM 更新方法
+    const updateElement = (id, value, property = 'textContent') => {
+        const element = document.getElementById(id);
+        if (element) {
+            element[property] = value;
+        } else {
+            console.warn(`Element ${id} not found`);
+        }
+    };
+    
+    updateElement('site-title', config.site.title);
+    updateElement('site-description', config.site.description, 'content');
+    updateElement('site-heading', config.site.title);
+    updateElement('result-text', config.ui.testingText);
     document.title = config.site.title;
-    document.getElementById('site-description').content = config.site.description;
-    document.getElementById('site-heading').textContent = config.site.title;
-    document.getElementById('result-text').textContent = config.ui.testingText;
 }
 
-let config;
-
-async function init() {
-    config = await loadConfig();
-    await updateUIFromConfig();
-    await testAllCDNs();
+function stopTesting() {
+    isTestingActive = false;
+    // 中止所有控制器并清理
+    activeControllers.forEach(controller => {
+        try {
+            controller.abort();
+        } catch (error) {
+            console.warn('中止控制器失败:', error);
+        }
+    });
+    activeControllers = [];
+    
+    if (redirectTimer) {
+        clearTimeout(redirectTimer);
+        redirectTimer = null;
+    }
+    
+    const stopBtn = document.getElementById('stop-btn');
+    if (stopBtn) {
+        stopBtn.style.display = 'none';
+    }
+    
+    const resultText = document.getElementById('result-text');
+    if (resultText) {
+        resultText.textContent = '测试已停止';
+    }
 }
+
+window.onload = async function init() {
+    try {
+        isTestingActive = true; // 重置测试状态
+        config = await loadConfig();
+        await updateUIFromConfig();
+        await testAllCDNs(); // 假设这个函数存在
+    } catch (err) {
+        console.error("初始化失败: ", err);
+        const resultElement = document.getElementById('result-text');
+        if (resultElement) {
+            resultElement.innerHTML = `
+                <span class="status-error">配置加载失败</span>
+                <button id="retry-btn" onclick="init()">重试</button>
+            `;
+        }
+        isTestingActive = false;
+    }
+};
 
 async function measureLatency(url, timeout = config.speedtest.timeout) {
     const attempts = config.speedtest.attempts;
@@ -27,9 +99,13 @@ async function measureLatency(url, timeout = config.speedtest.timeout) {
     let totalLatency = 0;
     let successCount = 0;
 
+    const controller = new AbortController();
+    activeControllers.push(controller);
+
     for (let i = 0; i < attempts; i++) {
+        if (!isTestingActive) return Infinity;
         for (let retry = 0; retry <= maxRetries; retry++) {
-            const controller = new AbortController();
+            if (!isTestingActive) return Infinity;
             const signal = controller.signal;
             const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -62,10 +138,23 @@ async function measureLatency(url, timeout = config.speedtest.timeout) {
         }
     }
 
+    const index = activeControllers.indexOf(controller);
+    if (index > -1) {
+        activeControllers.splice(index, 1);
+    }
+
     return successCount > 0 ? totalLatency / successCount : Infinity;
 }
 
 async function testAllCDNs() {
+    if (!config || !Array.isArray(config.cdnEndpoints) || config.cdnEndpoints.length === 0) {
+        console.error("CDN 配置无效");
+        return;
+    }
+
+    isTestingActive = true;
+    document.getElementById('stop-btn').style.display = 'inline-block';
+
     const results = document.getElementById('test-results');
     const resultText = document.getElementById('result-text');
     const progressBar = document.querySelector('.progress-fill');
@@ -83,6 +172,8 @@ async function testAllCDNs() {
     };
 
     const testPromises = config.cdnEndpoints.map(async (cdn) => {
+        if (!isTestingActive) return;
+
         const resultElement = document.createElement('div');
         resultElement.className = 'test-result testing';
         resultElement.innerHTML = `
@@ -113,6 +204,9 @@ async function testAllCDNs() {
 
     await Promise.all(testPromises);
 
+    if (!isTestingActive) return;
+
+    document.getElementById('stop-btn').style.display = 'none';
     const validResults = cdnResults.filter(result => result.latency !== Infinity);
     if (validResults.length > 0) {
         const bestResult = validResults.reduce((a, b) => a.latency < b.latency ? a : b);
@@ -122,13 +216,26 @@ async function testAllCDNs() {
             <button id="retry-btn" onclick="testAllCDNs()">${config.ui.retryText}</button>
         `;
         
-        setTimeout(() => {
-            window.location.href = bestResult.cdn.url;
-        }, 2000);
+        redirect(bestResult.cdn.url);
     } else {
         resultText.innerHTML = `
-            <span class="status-error">所有线路测试失败</span>
+            <span class="status-error">${config.ui.allFailedText}</span>
             <button id="retry-btn" onclick="testAllCDNs()">${config.ui.retryText}</button>
+        `;
+    }
+}
+
+async function redirect(url) {
+    try {
+        const testUrl = new URL(url);
+        redirectTimer = setTimeout(() => {
+            window.location.href = url;
+        }, config.speedtest.redirectDelay);
+    } catch(e) {
+        console.error("无效的重定向URL:", e);
+        document.getElementById('result-text').innerHTML = `
+            <span class="status-error">重定向失败</span>
+            <button id="retry-btn" onclick="testAllCDNs()">重试</button>
         `;
     }
 }
@@ -142,5 +249,3 @@ const debounce = (fn, delay) => {
 };
 
 const debouncedTestAllCDNs = debounce(testAllCDNs, 1000);
-
-window.onload = init;

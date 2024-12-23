@@ -214,6 +214,26 @@ h1 {
     box-shadow: 0 6px 20px rgba(124, 77, 255, 0.4);
 }
 
+#stop-btn {
+    margin-left: 1rem;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(45deg, var(--primary-color), #9669FF);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(124, 77, 255, 0.3);
+}
+
+#stop-btn:hover {
+    background: #5b52ff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(124, 77, 255, 0.4);
+}
+
 .status-success {
     color: var(--primary-color);
 }
@@ -303,15 +323,51 @@ h1 {
         padding: 1.5rem;
         width: 85%;
         max-width: 320px;
+        border-radius: 16px;
+        max-width: 340px;
+        width: 95%;
     }
-    
+
     h1 {
         font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .rocket {
+        font-size: 3rem;
+    }
+
+    .logo {
+        margin-bottom: 1.5rem;
+    }
+
+    .circle-ripple {
+        width: 80px;
+        height: 80px;
     }
 
     .test-result {
-        margin: 0.8rem 0;
         padding: 0.8rem;
+        margin: 0.8rem 0;
+        font-size: 0.9rem;
+    }
+
+    .waiting-text {
+        font-size: 0.8rem;
+    }
+
+    #retry-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    #stop-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .progress-bar {
+        margin: 1rem 0;
     }
 }
 
@@ -338,52 +394,6 @@ h1 {
     }
 }
 
-@media (max-width: 480px) {
-    .loading-card {
-        padding: 1.5rem;
-        width: 85%;
-        max-width: 320px;
-        border-radius: 16px;
-    }
-
-    h1 {
-        font-size: 1.4rem;
-        margin-bottom: 1rem;
-    }
-
-    .rocket {
-        font-size: 3rem;
-    }
-
-    .logo {
-        margin-bottom: 1.5rem;
-    }
-
-    .circle-ripple {
-        width: 80px;
-        height: 80px;
-    }
-
-    .test-result {
-        padding: 0.8rem;
-        margin: 0.8rem 0;
-        font-size: 0.85rem;
-    }
-
-    .waiting-text {
-        font-size: 0.8rem;
-    }
-
-    #retry-btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
-    }
-
-    .progress-bar {
-        margin: 1rem 0;
-    }
-}
-
 @media (max-width: 360px) {
     .loading-card {
         padding: 1.2rem;
@@ -406,6 +416,11 @@ h1 {
     }
 
     #retry-btn {
+        margin-top: 0.5rem;
+        margin-left: 0;
+    }
+
+    #stop-btn {
         margin-top: 0.5rem;
         margin-left: 0;
     }
