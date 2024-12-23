@@ -300,11 +300,113 @@ h1 {
 
 @media (max-width: 480px) {
     .loading-card {
-        padding: 2rem;
-        width: 95%;
+        padding: 1.5rem;
+        width: 85%;
+        max-width: 320px;
     }
     
     h1 {
         font-size: 1.5rem;
+    }
+
+    .test-result {
+        margin: 0.8rem 0;
+        padding: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .loading-card {
+        padding: 2rem;
+        width: 80%;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .rocket {
+        font-size: 3.5rem;
+    }
+
+    .test-result {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .loading-card {
+        padding: 1.5rem;
+        width: 85%;
+        max-width: 320px;
+        border-radius: 16px;
+    }
+
+    h1 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .rocket {
+        font-size: 3rem;
+    }
+
+    .logo {
+        margin-bottom: 1.5rem;
+    }
+
+    .circle-ripple {
+        width: 80px;
+        height: 80px;
+    }
+
+    .test-result {
+        padding: 0.8rem;
+        margin: 0.8rem 0;
+        font-size: 0.85rem;
+    }
+
+    .waiting-text {
+        font-size: 0.8rem;
+    }
+
+    #retry-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .progress-bar {
+        margin: 1rem 0;
+    }
+}
+
+@media (max-width: 360px) {
+    .loading-card {
+        padding: 1.2rem;
+        width: 88%;
+        max-width: 280px;
+    }
+
+    h1 {
+        font-size: 1.2rem;
+    }
+
+    .test-result {
+        padding: 0.7rem;
+        font-size: 0.8rem;
+    }
+
+    .waiting-text {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    #retry-btn {
+        margin-top: 0.5rem;
+        margin-left: 0;
     }
 }
